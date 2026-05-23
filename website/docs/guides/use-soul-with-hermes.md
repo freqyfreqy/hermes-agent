@@ -6,13 +6,15 @@ description: "How to use SOUL.md to shape Hermes Agent's default voice, what bel
 
 # Use SOUL.md with Hermes
 
-`SOUL.md` is the **primary identity** for your Hermes instance. It's the first thing in the system prompt — it defines who the agent is, how it speaks, and what it avoids.
+`SOUL.md` is the **primary identity** for your Hermes instance. It sits in slot #1 of the system prompt — the highest-priority instruction layer. It defines who the agent is, how it speaks, what it avoids, and any durable behavioral rules you want applied everywhere.
 
 If you want Hermes to feel like the same assistant every time you talk to it — or if you want to replace the Hermes persona entirely with your own — this is the file to use.
 
 ## What SOUL.md is for
 
-Use `SOUL.md` for:
+The docs usually frame this as "personality only." That's the common use case, but `SOUL.md` is a system prompt file — it can carry anything that should apply everywhere.
+
+### Sweet spot (tone and voice)
 - tone
 - personality
 - communication style
@@ -20,12 +22,18 @@ Use `SOUL.md` for:
 - what Hermes should avoid stylistically
 - how Hermes should relate to uncertainty, disagreement, and ambiguity
 
+### Also fair game (system-wide rules)
+- behavioral constraints ("never run destructive commands without approval")
+- tool-use preferences ("always use `patch` instead of `sed` for file edits")
+- coding defaults ("prefer pytest, use type hints")
+- any rule that should follow you across every project
+
 In short:
-- `SOUL.md` is about who Hermes is and how Hermes speaks
+- `SOUL.md` is about who Hermes is and how Hermes behaves
 
 ## What SOUL.md is not for
 
-Do not use it for:
+Don't use it for temporary or repo-specific things:
 - repo-specific coding conventions
 - file paths
 - commands
@@ -38,6 +46,8 @@ Those belong in `AGENTS.md`.
 A good rule:
 - if it should apply everywhere, put it in `SOUL.md`
 - if it only belongs to one project, put it in `AGENTS.md`
+
+The boundary is softer than the docs used to claim — both files are system prompt layers, just scoped differently. But the split above is still the right default.
 
 ## Where it lives
 
@@ -195,19 +205,25 @@ Examples:
 
 ## SOUL.md vs AGENTS.md
 
-This is the most common mistake.
+This is the most common point of confusion — and the docs have historically drawn too hard a line.
 
-### Put this in SOUL.md
-- “Be direct.”
-- “Avoid hype language.”
-- “Prefer short answers unless depth helps.”
-- “Push back when the user is wrong.”
+### Safe default split
 
-### Put this in AGENTS.md
-- “Use pytest, not unittest.”
-- “Frontend lives in `frontend/`.”
-- “Never edit migrations directly.”
-- “The API runs on port 8000.”
+| Put this in SOUL.md | Put this in AGENTS.md |
+|---|---|
+| "Be direct." | "Use pytest, not unittest." |
+| "Avoid hype language." | "Frontend lives in `frontend/`." |
+| "Prefer short answers unless depth helps." | "Never edit migrations directly." |
+| "Push back when the user is wrong." | "The API runs on port 8000." |
+| "Always use `patch` over `sed`." | "Run tests with `make test`." |
+
+### The mechanical reality
+
+Both files are **system prompt layers** — plain markdown injected into different slots of the prompt. The only difference is scope: `SOUL.md` follows you everywhere (loaded from HERMES_HOME), while `AGENTS.md` only loads when you're in that project's directory.
+
+So if you have a rule that should apply in every repo — "prefer fixture factories over `conftest` boilerplate" or "never use `rm -rf` without `--dry-run`" — it's perfectly fine in `SOUL.md`. The old docs said that belongs in AGENTS.md, but that was wrong. It belongs where you want it scoped.
+
+Rule of thumb: start with the personality split above. If you find yourself repeating the same instructions in every project's `AGENTS.md`, move them to `SOUL.md`.
 
 ## How to edit it
 

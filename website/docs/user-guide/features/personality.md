@@ -8,10 +8,23 @@ description: "Customize Hermes Agent's personality with a global SOUL.md, built-
 
 Hermes Agent's personality is fully customizable. `SOUL.md` is the **primary identity** — it's the first thing in the system prompt and defines who the agent is.
 
-- `SOUL.md` — a durable persona file that lives in `HERMES_HOME` and serves as the agent's identity (slot #1 in the system prompt)
+- `SOUL.md` — a durable file that lives in `HERMES_HOME` and occupies slot #1 in the system prompt. It replaces the built-in default identity entirely.
 - built-in or custom `/personality` presets — session-level system-prompt overlays
 
 If you want to change who Hermes is — or replace it with an entirely different agent persona — edit `SOUL.md`.
+
+### What SOUL.md actually is
+
+Calling it "personality" is the user-facing label, but mechanically `SOUL.md` is a **system prompt file** — the highest-priority instruction layer. It's injected verbatim as slot #1 of the system prompt with no wrapper. That means it can contain anything a system prompt can:
+
+- tone and communication style
+- behavioral rules and constraints
+- operational philosophy
+- tool-use enforcement patterns
+- memory and task-management procedures
+- project-agnostic knowledge references
+
+The personality lens is the right framing for users who just want to tweak voice, but it undersells the file's actual power. `SOUL.md` is your per-instance system prompt — the same kind of thing `AGENTS.md` is for a project, just scoped to the Hermes instance instead of a specific repo.
 
 ## How SOUL.md works now
 
@@ -65,7 +78,9 @@ $HERMES_HOME/SOUL.md
 
 ## What should go in SOUL.md?
 
-Use it for durable voice and personality guidance, such as:
+The personality stuff is the sweet spot for most users, but it's not the whole picture. `SOUL.md` is a system prompt file — use it for anything that should apply everywhere, every session.
+
+### Best fit (personality and voice)
 - tone
 - communication style
 - level of directness
@@ -73,13 +88,19 @@ Use it for durable voice and personality guidance, such as:
 - what to avoid stylistically
 - how Hermes should handle uncertainty, disagreement, or ambiguity
 
-Use it less for:
+### Also fair game (system-wide behavior)
+- operational rules and constraints ("never suggest `rm -rf`")
+- tool-use policies ("always prefer `patch` over `sed`")
+- preferred coding philosophy or architectural defaults
+- cross-project conventions you want followed everywhere
+
+### Not a great fit (temporary or project-specific)
 - one-off project instructions
 - file paths
 - repo conventions
 - temporary workflow details
 
-Those belong in `AGENTS.md`, not `SOUL.md`.
+When instructions are project-specific, they belong in `AGENTS.md`. When they're temporary, use `/personality` or just say them in conversation.
 
 ## Good SOUL.md content
 
@@ -134,27 +155,30 @@ That means you should still keep it focused on persona/voice rather than trying 
 
 ## SOUL.md vs AGENTS.md
 
-This is the most important distinction.
+This is the most important distinction — and also where the docs have been misleading.
 
-### SOUL.md
-Use for:
-- identity
-- tone
-- style
-- communication defaults
-- personality-level behavior
+The clean story: `SOUL.md` = personality, `AGENTS.md` = project instructions. That's a useful starting point, but the mechanical reality is less neat.
 
-### AGENTS.md
-Use for:
-- project architecture
-- coding conventions
-- tool preferences
-- repo-specific workflows
-- commands, ports, paths, deployment notes
+Both files are **system prompt layers**. They're injected into different slots but they're the same kind of thing — plain markdown that becomes instructions for the agent. The only real difference is **scope**:
 
-A useful rule:
-- if it should follow you everywhere, it belongs in `SOUL.md`
-- if it belongs to a project, it belongs in `AGENTS.md`
+| | SOUL.md | AGENTS.md |
+|--|---------|-----------|
+| Scope | Instance-wide (HERMES_HOME) | Per-project (current directory) |
+| Slot | #1 — agent identity | Later — context files |
+| Content | Anything that applies everywhere | Anything that applies in this repo |
+
+So if you have a rule that should follow you across every project — "prefer pytest over unittest", "always use `patch` over `sed`", "never suggest `rm -rf`" — it can go in either file. The rule is: if you want it everywhere, put it in `SOUL.md`. If it only matters in this repo, put it in `AGENTS.md`.
+
+Old framing was:
+- **SOUL.md**: identity, tone, style, communication defaults — personality-level behavior
+- **AGENTS.md**: project architecture, coding conventions, tool preferences, repo-specific workflows, commands, ports, paths, deployment notes
+
+New framing: that's still the sweet spot for each file, but the boundary is softer than advertised. Both files are system prompts. `SOUL.md` just happens to be the one that follows you everywhere.
+
+### A useful rule
+- if it should follow you across all projects → `SOUL.md`
+- if it belongs to a single project → `AGENTS.md`
+- if you're unsure → `SOUL.md` is fine. Move it to `AGENTS.md` later if it only ends up mattering for one repo.
 
 ## SOUL.md vs `/personality`
 
